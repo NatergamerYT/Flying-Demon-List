@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - Game Leaderboard{% endblock %}
+
+{% block content %}
+<style>
+/* Leaderboard specific styles */
+.first-victor-badge {
+    background: linear-gradient(45deg, #DC143C, #FF6347, #DC143C);
+    background-size: 200% 200%;
+    animation: pulse 2s ease-in-out infinite;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0,0,0,0.7);
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+    color: #fff;
+    border: 2px solid #FFD700;
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #8B0000 0%, #660000 100%);
+    color: #fff;
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #660000 0%, #330000 100%);
+    color: #fff;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">Leaderboard</h1>
+        <p class="lead text-muted">Users ranked by cumulative score from completed levels</p>
+    </div>
+</div>
+
+{% if user_rankings %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 80px;">Rank</th>
+                    <th>User</th>
+                    <th>Total Points</th>
+                    <th>Levels Completed</th>
+                    <th>First Victor Badges</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ranking in user_rankings %}
+                    <tr>
+                        <td>
+                            {% set rank = loop.index %}
+                            {% if rank == 1 %}
+                                <span class="badge rank-1 fs-5">🥇 #{{ rank }}</span>
+                            {% elif rank == 2 %}
+                                <span class="badge rank-2 fs-5">🥈 #{{ rank }}</span>
+                            {% elif rank == 3 %}
+                                <span class="badge rank-3 fs-5">🥉 #{{ rank }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6">#{{ rank }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('users.profile', username=ranking.user.username) }}" class="fw-bold text-decoration-none d-flex align-items-center">
+                                {% if ranking.user.profile_picture %}
+                                    <img src="{{ url_for('static', filename='uploads/' + ranking.user.profile_picture) }}" alt="Profile" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% endif %}
+                                {{ ranking.user.username }}
+                            </a>
+                        </td>
+                        <td><span class="badge bg-primary fs-6">{{ ranking.total_points }} pts</span></td>
+                        <td>{{ ranking.completed_levels }}</td>
+                        <td>
+                            {% if ranking.first_victor_count > 0 %}
+                                <span class="badge first-victor-badge">👑 {{ ranking.first_victor_count }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('users.profile', username=ranking.user.username) }}" class="btn btn-sm btn-outline-primary">
+                                View Profile
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">No Ranked Users Yet</h4>
+        <p>No users have completed any levels yet. Be the first to submit a claim!</p>
+        {% if current_user.is_authenticated %}
+            <hr>
+            <a href="{{ url_for('claims.submit') }}" class="btn btn-primary">Submit a Claim</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

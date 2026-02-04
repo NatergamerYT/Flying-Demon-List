@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Levels - Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">Manage Levels</h1>
+        <p class="lead text-muted">Add, edit, or remove game levels</p>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Add New Level</h4>
+                <form method="POST" action="{{ url_for('admin.add_level') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Level Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="difficulty" class="form-label">Difficulty</label>
+                        <select class="form-select" id="difficulty" name="difficulty">
+                            <option value="">Select difficulty...</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rank" class="form-label">Rank (1-50, Optional)</label>
+                        <input type="number" class="form-control" id="rank" name="rank" min="1" max="50" placeholder="Leave blank for unranked">
+                        <small class="form-text text-muted">Rank determines points (51 - rank). Higher rank = more points.</small>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add Level</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-3">Existing Levels</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th style="width: 100px;">Difficulty</th>
+                        <th style="width: 120px;">Rank</th>
+                        <th style="width: 100px;">Points</th>
+                        <th style="width: 80px;">Claims</th>
+                        <th style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for level in levels %}
+                        <tr data-level-id="{{ level.id }}">
+                            <td>{{ level.id }}</td>
+                            <td><strong>{{ level.name }}</strong></td>
+                            <td>{{ level.description or '-' }}</td>
+                            <td>
+                                {% if level.difficulty %}
+                                    <span class="badge
+                                        {% if level.difficulty == 'Easy' %}bg-success
+                                        {% elif level.difficulty == 'Medium' %}bg-warning
+                                        {% elif level.difficulty == 'Hard' %}bg-danger
+                                        {% endif %}">
+                                        {{ level.difficulty }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <input type="number"
+                                       class="form-control form-control-sm rank-input"
+                                       data-level-id="{{ level.id }}"
+                                       value="{{ level.rank or '' }}"
+                                       min="1" max="50"
+                                       placeholder="unranked"
+                                       title="Enter rank 1-50">
+                            </td>
+                            <td><strong class="points-display">{{ level.points }}</strong> pts</td>
+                            <td>{{ level.claims.count() }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.manage_ranks', level_id=level.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    View Claims
+                                </a>
+                                {% if level.claims.count() == 0 %}
+                                    <form method="POST" action="{{ url_for('admin.delete_level', level_id=level.id) }}" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Are you sure you want to delete this level?')">
+                                            Delete
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    // Debounce function to limit API calls
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Handle rank input changes
+    document.querySelectorAll('.rank-input').forEach(input => {
+        const updateRank = debounce(function() {
+            const levelId = input.dataset.levelId;
+            const newRank = input.value === '' ? null : parseInt(input.value);
+            const row = input.closest('tr');
+            const pointsDisplay = row.querySelector('.points-display');
+
+            fetch(`/admin/level/${levelId}/update-rank`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ rank: newRank })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload page to show all automatic rank adjustments
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Failed to update rank.');
+                    // Revert input value on error
+                    input.value = input.defaultValue;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update rank. Please try again.');
+                input.value = input.defaultValue;
+            });
+        }, 800);
+
+        input.addEventListener('input', updateRank);
+
+        // Allow clearing with backspace
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                // Allow clearing the field
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

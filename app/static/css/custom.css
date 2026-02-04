@@ -1,0 +1,493 @@
+/* Dark Mode Theme with Red Accents - Game Leaderboard */
+
+:root {
+    /* Dark mode colors */
+    --bg-dark: #0f0f0f;
+    --bg-darker: #050505;
+    --bg-card: #1a1a1a;
+    --bg-card-hover: #252525;
+
+    /* Red accent colors */
+    --red-primary: #ff3b3b;
+    --red-dark: #cc0000;
+    --red-darker: #990000;
+    --red-light: #ff6666;
+    --red-glow: rgba(255, 59, 59, 0.3);
+
+    /* Text colors */
+    --text-primary: #ff4444;
+    --text-secondary: #ff6666;
+    --text-muted: #999999;
+    --text-white: #e0e0e0;
+
+    /* Other colors */
+    --success-color: #00ff88;
+    --warning-color: #ffaa00;
+    --danger-color: #ff3b3b;
+    --info-color: #00ccff;
+
+    /* Borders */
+    --border-color: #333333;
+    --border-red: #ff3b3b;
+}
+
+/* Global dark background */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+    /* color: var(--text-white) !important; */ /* Removed to allow theme colors */
+}
+
+/* Override Bootstrap text colors - DISABLED to allow proper theme colors */
+/* body, p, h1, h2, h3, h4, h5, h6, span, div, a, label, .lead {
+    color: var(--text-white) !important;
+} */
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Disabled conflicting text color overrides - handled in base.html */
+/*
+.text-primary {
+    color: var(--red-primary) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+*/
+
+main.container {
+    flex: 1;
+}
+
+footer {
+    margin-top: auto;
+    background: var(--bg-darker) !important;
+    border-top: 2px solid var(--border-red) !important;
+}
+
+/* Navbar dark theme */
+.navbar {
+    background: linear-gradient(90deg, var(--bg-darker) 0%, #1a0000 100%) !important;
+    border-bottom: 2px solid var(--red-primary);
+    box-shadow: 0 4px 20px var(--red-glow);
+}
+
+.navbar-brand {
+    color: var(--red-primary) !important;
+    text-shadow: 0 0 10px var(--red-glow);
+    font-weight: bold;
+}
+
+.navbar-brand strong {
+    letter-spacing: 0.5px;
+    color: var(--red-primary) !important;
+}
+
+.nav-link {
+    color: var(--text-white) !important;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--red-primary) !important;
+    text-shadow: 0 0 8px var(--red-glow);
+}
+
+.navbar-toggler {
+    border-color: var(--red-primary) !important;
+}
+
+.navbar-toggler-icon {
+    filter: brightness(0) saturate(100%) invert(45%) sepia(97%) saturate(3000%) hue-rotate(340deg);
+}
+
+/* Cards dark theme */
+.card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease;
+    color: var(--text-white) !important;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 59, 59, 0.2) !important;
+    border-color: var(--red-primary) !important;
+}
+
+.card-title {
+    color: var(--red-primary) !important;
+}
+
+.card-body {
+    background: var(--bg-card) !important;
+}
+
+.card.border-primary { border-color: var(--red-primary) !important; }
+.card.border-success { border-color: var(--success-color) !important; }
+.card.border-warning { border-color: var(--warning-color) !important; }
+.card.border-danger { border-color: var(--danger-color) !important; }
+.card.border-info { border-color: var(--info-color) !important; }
+.card.border-secondary { border-color: var(--text-secondary) !important; }
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--red-primary) 0%, var(--red-dark) 100%) !important;
+    border: 1px solid var(--red-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px var(--red-glow);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--red-light) 0%, var(--red-primary) 100%) !important;
+    box-shadow: 0 6px 25px rgba(255, 59, 59, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-white) !important;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-hover) !important;
+    border-color: var(--red-primary) !important;
+}
+
+.btn-outline-primary {
+    border-color: var(--red-primary) !important;
+    color: var(--red-primary) !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--red-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px var(--red-glow);
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-color) !important;
+    color: var(--text-white) !important;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bg-card) !important;
+    border-color: var(--red-primary) !important;
+}
+
+.btn-success {
+    background: var(--success-color) !important;
+    border-color: var(--success-color) !important;
+    color: #000000 !important;
+}
+
+.btn-warning {
+    background: var(--warning-color) !important;
+    border-color: var(--warning-color) !important;
+    color: #000000 !important;
+}
+
+.btn-danger {
+    background: var(--danger-color) !important;
+    border-color: var(--danger-color) !important;
+}
+
+.btn-info {
+    background: var(--info-color) !important;
+    border-color: var(--info-color) !important;
+    color: #000000 !important;
+}
+
+/* Forms */
+.form-control, .form-select {
+    background: var(--bg-darker) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-white) !important;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background: var(--bg-card) !important;
+    border-color: var(--red-primary) !important;
+    box-shadow: 0 0 15px var(--red-glow) !important;
+    color: var(--text-white) !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.form-label {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+}
+
+.form-text {
+    color: var(--text-muted) !important;
+}
+
+/* Alerts */
+.alert {
+    animation: slideDown 0.3s ease-out;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: rgba(0, 255, 136, 0.1) !important;
+    border-color: var(--success-color) !important;
+    color: var(--success-color) !important;
+}
+
+.alert-danger {
+    background: rgba(255, 59, 59, 0.1) !important;
+    border-color: var(--danger-color) !important;
+    color: var(--red-light) !important;
+}
+
+.alert-warning {
+    background: rgba(255, 170, 0, 0.1) !important;
+    border-color: var(--warning-color) !important;
+    color: var(--warning-color) !important;
+}
+
+.alert-info {
+    background: rgba(0, 204, 255, 0.1) !important;
+    border-color: var(--info-color) !important;
+    color: var(--info-color) !important;
+}
+
+.alert-light {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-white) !important;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Badges */
+.badge {
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 0.4em 0.8em;
+}
+
+.badge.bg-primary {
+    background: var(--red-primary) !important;
+    box-shadow: 0 2px 8px var(--red-glow);
+}
+.badge.bg-success { background: var(--success-color) !important; color: #000 !important; }
+.badge.bg-warning { background: var(--warning-color) !important; color: #000 !important; }
+.badge.bg-danger { background: var(--danger-color) !important; }
+.badge.bg-info { background: var(--info-color) !important; color: #000 !important; }
+.badge.bg-secondary { background: var(--text-muted) !important; }
+
+/* Tables */
+.table {
+    color: var(--text-white) !important;
+    background: var(--bg-card) !important;
+}
+
+.table thead th {
+    background: var(--bg-darker) !important;
+    color: var(--red-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.table tbody tr {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background: var(--bg-card-hover) !important;
+    box-shadow: 0 0 15px rgba(255, 59, 59, 0.1);
+}
+
+.table td, .table th {
+    border-color: var(--border-color) !important;
+}
+
+/* Vote button */
+.vote-btn {
+    transition: all 0.2s ease-in-out;
+    border: 2px solid var(--red-primary) !important;
+}
+
+.vote-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--red-glow);
+}
+
+.vote-btn.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* YouTube iframe */
+.ratio iframe {
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+/* Display headings */
+.display-1, .display-2, .display-3, .display-4, .display-5 {
+    color: var(--red-primary) !important;
+    font-weight: 700;
+    text-shadow: 0 0 20px var(--red-glow);
+}
+
+/* List groups */
+.list-group-item {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-white) !important;
+}
+
+.list-group-item:hover {
+    background: var(--bg-card-hover) !important;
+    border-color: var(--red-primary) !important;
+}
+
+.list-group-item-action {
+    transition: all 0.2s ease;
+}
+
+/* Links */
+a {
+    color: var(--red-primary) !important;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    color: var(--red-light) !important;
+    text-shadow: 0 0 8px var(--red-glow);
+}
+
+/* Validation feedback */
+.invalid-feedback {
+    color: var(--red-light) !important;
+}
+
+.is-invalid {
+    border-color: var(--red-primary) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--red-dark) 0%, var(--red-darker) 100%);
+    border-radius: 6px;
+    border: 2px solid var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--red-primary) 0%, var(--red-dark) 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-1 {
+        font-size: 4rem;
+    }
+
+    .display-4 {
+        font-size: 2.5rem;
+    }
+
+    .display-5 {
+        font-size: 2rem;
+    }
+}
+
+/* Special glowing effects */
+.navbar-brand strong:hover {
+    text-shadow: 0 0 15px var(--red-glow), 0 0 30px var(--red-glow);
+}
+
+/* Background pattern overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(255, 59, 59, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 0, 0, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Collapsible claim cards */
+.claim-card .card-header {
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.claim-card .card-header:hover {
+    background: var(--bg-card-hover) !important;
+    border-color: var(--red-primary) !important;
+}
+
+.collapse-icon {
+    transition: transform 0.3s ease;
+    color: var(--red-primary);
+}
+
+.card-header[aria-expanded="true"] .collapse-icon {
+    transform: rotate(180deg);
+}
+
+/* Chevron down icon (using CSS) */
+.collapse-icon::before {
+    content: '▼';
+    font-size: 0.8rem;
+}
+
+/* Smooth collapse animation */
+.collapse {
+    transition: height 0.3s ease;
+}
+
+.collapsing {
+    transition: height 0.3s ease;
+}
+
+/* Card header hover effect */
+.claim-card .card-header h5 {
+    transition: color 0.2s ease;
+}
+
+.claim-card .card-header:hover h5 {
+    color: var(--red-primary) !important;
+}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}My Claims - Game Leaderboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">My Claims</h1>
+        <p class="lead text-muted">View and track your submitted claims</p>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <a href="{{ url_for('claims.submit') }}" class="btn btn-primary">Submit New Claim</a>
+    </div>
+</div>
+
+{% if claims %}
+    <div class="row">
+        <div class="col-12">
+            {% for claim in claims %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h4 class="card-title">
+                                    {{ claim.level.name }}
+                                    {% if claim.level.difficulty %}
+                                        <span class="badge
+                                            {% if claim.level.difficulty == 'Easy' %}bg-success
+                                            {% elif claim.level.difficulty == 'Medium' %}bg-warning
+                                            {% elif claim.level.difficulty == 'Hard' %}bg-danger
+                                            {% endif %}">
+                                            {{ claim.level.difficulty }}
+                                        </span>
+                                    {% endif %}
+                                </h4>
+
+                                <div class="mb-2">
+                                    <span class="badge
+                                        {% if claim.status == 'approved' %}bg-success
+                                        {% elif claim.status == 'rejected' %}bg-danger
+                                        {% else %}bg-warning text-dark
+                                        {% endif %}">
+                                        {{ claim.status.upper() }}
+                                    </span>
+                                </div>
+
+                                <p class="mb-1">
+                                    <strong>Submitted:</strong> {{ claim.submitted_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                </p>
+
+                                {% if claim.status == 'approved' %}
+                                    {% if claim.rank %}
+                                        <p class="mb-1"><strong>Rank:</strong> #{{ claim.rank }}</p>
+                                        <p class="mb-1"><strong>Points:</strong> {{ claim.points }}</p>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if claim.user_notes %}
+                                    <p class="mb-1 mt-2"><strong>Your Notes:</strong></p>
+                                    <p class="text-muted"><em>{{ claim.user_notes }}</em></p>
+                                {% endif %}
+
+                                {% if claim.status == 'rejected' and claim.admin_notes %}
+                                    <div class="alert alert-danger mt-2">
+                                        <strong>Rejection Reason:</strong> {{ claim.admin_notes }}
+                                    </div>
+                                {% endif %}
+
+                                {% if claim.status == 'approved' and claim.admin_notes %}
+                                    <div class="alert alert-info mt-2">
+                                        <strong>Admin Note:</strong> {{ claim.admin_notes }}
+                                    </div>
+                                {% endif %}
+
+                                <p class="mb-0">
+                                    <a href="{{ claim.youtube_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        Watch on YouTube
+                                    </a>
+                                </p>
+                            </div>
+
+                            <div class="col-md-4">
+                                {% set video_id = claim.youtube_link | youtube_id %}
+                                {% if video_id %}
+                                    <div class="ratio ratio-16x9">
+                                        <iframe
+                                            src="https://www.youtube.com/embed/{{ video_id }}"
+                                            title="{{ claim.level.name }}"
+                                            allowfullscreen>
+                                        </iframe>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">No Claims Yet</h4>
+        <p>You haven't submitted any claims yet. Submit your first level completion to get started!</p>
+        <hr>
+        <a href="{{ url_for('claims.submit') }}" class="btn btn-primary">Submit Your First Claim</a>
+    </div>
+{% endif %}
+{% endblock %}

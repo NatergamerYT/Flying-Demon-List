@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Flying Demon List - Home{% endblock %}
+
+{% block content %}
+<div class="banner-section mb-5">
+    <div class="position-relative" style="height: 300px; overflow: hidden; border-radius: 10px;">
+        <img src="{{ url_for('static', filename='banner.png') }}" 
+             alt="Banner" 
+             class="w-100 h-100" 
+             style="object-fit: cover;">
+        <div class="position-absolute top-50 start-50 translate-middle text-center text-white" 
+             style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+            <h1 class="display-3 fw-bold mb-0">Flying Demon List</h1>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-primary">{{ stats.total_claims }}</h3>
+                <p class="card-text text-muted">Approved Claims</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-success">{{ stats.total_users }}</h3>
+                <p class="card-text text-muted">Players</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-info">{{ stats.total_levels }}</h3>
+                <p class="card-text text-muted">Levels</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Ranked Levels</h2>
+        {% if hardest_levels %}
+            <div class="accordion" id="levelsAccordion">
+                {% for level in hardest_levels %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button {% if loop.first %}show{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ level.id }}" aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ level.id }}">
+                                <strong>{{ level.name }}</strong>
+                                {% if level.difficulty %}
+                                    <span class="badge ms-2 
+                                        {% if level.difficulty == 'Easy' %}bg-success
+                                        {% elif level.difficulty == 'Medium' %}bg-warning text-dark
+                                        {% elif level.difficulty == 'Hard' %}bg-danger
+                                        {% endif %}">
+                                        {{ level.difficulty }}
+                                    </span>
+                                {% endif %}
+                                {% if level.rank %}
+                                    <small class="text-muted ms-2">Rank #{{ level.rank }} ({{ level.points }} pts)</small>
+                                {% endif %}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ level.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#levelsAccordion">
+                            <div class="accordion-body">
+                                {% if level.description %}
+                                    <p class="mb-3">{{ level.description }}</p>
+                                {% endif %}
+                                
+                                {% if level.video_id %}
+                                    <div class="mb-3">
+                                        <h5>Featured Completion Video</h5>
+                                        <div class="ratio ratio-16x9">
+                                            <iframe src="https://www.youtube.com/embed/{{ level.video_id }}" 
+                                                    title="YouTube video player" 
+                                                    frameborder="0" 
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                                    allowfullscreen></iframe>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if level.first_victor %}
+                                    <div class="mb-3">
+                                        <h5>First Victor</h5>
+                                        <div class="d-flex align-items-center mb-1">
+                                            {% if level.first_victor.profile_picture %}
+                                                <img src="{{ url_for('static', filename='uploads/' + level.first_victor.profile_picture) }}" 
+                                                     class="rounded-circle me-3" width="50" height="50" alt="Profile picture">
+                                            {% endif %}
+                                            <p class="fs-4 fw-bold text-primary mb-0">{{ level.first_victor.username }}</p>
+                                        </div>
+                                        {% if level.other_victors %}
+                                            <h6>Other Victors</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for victor in level.other_victors %}
+                                                    <div class="d-flex align-items-center">
+                                                        {% if victor.profile_picture %}
+                                                            <img src="{{ url_for('static', filename='uploads/' + victor.profile_picture) }}" 
+                                                                 class="rounded-circle me-1" width="24" height="24" alt="Profile picture">
+                                                        {% endif %}
+                                                        <span class="badge bg-secondary">{{ victor.username }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="text-muted">
+                                    <small>
+                                        {% set claim_count = level.claims|selectattr('status', 'equalto', 'approved')|list|length %}
+                                        {{ claim_count }} total completion{{ 's' if claim_count != 1 else '' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No levels available yet.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

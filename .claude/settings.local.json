@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(python -m venv:*)",
+      "Bash(venv\\\\Scripts\\\\python.exe -m pip:*)",
+      "Bash(./venv/Scripts/python.exe -m pip:*)",
+      "Bash(./venv/Scripts/python.exe:*)",
+      "Bash(psql:*)",
+      "Bash(./venv/Scripts/flask.exe db init:*)",
+      "Bash(./venv/Scripts/flask.exe db migrate:*)",
+      "Bash(./venv/Scripts/flask.exe db upgrade:*)",
+      "Bash(./venv/Scripts/flask.exe create-admin:*)",
+      "Bash(./venv/Scripts/flask.exe:*)",
+      "Bash(python run.py:*)",
+      "Bash(venv\\\\Scripts\\\\python.exe:*)",
+      "Bash(.venvScriptspython.exe run.py)",
+      "Bash(flask run)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(ls -la \"c:\\\\git\\\\Leaderboard\\\\app\\\\admin\"\" 2>/dev/null || echo \"Directory listing failed \")",
+      "Bash(venvScriptsactivate)",
+      "Bash(pip install:*)",
+      "Bash(timeout:*)",
+      "Bash(python -m pip install:*)",
+      "Bash(python:*)"
+    ]
+  }
+}

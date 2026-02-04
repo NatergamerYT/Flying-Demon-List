@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Claims - Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">Pending Claims</h1>
+        <p class="lead text-muted">Review and approve user submissions</p>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+{% if claims %}
+    {% for claim in claims %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 class="card-title">Claim #{{ claim.id }}</h4>
+                        <p class="mb-1"><strong>User:</strong>
+                            <a href="{{ url_for('users.profile', username=claim.user.username) }}">
+                                {% if claim.user.profile_picture %}
+                                    <img src="{{ url_for('static', filename='uploads/' + claim.user.profile_picture) }}" alt="Profile" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                                {% endif %}
+                                {{ claim.user.username }}
+                            </a>
+                        </p>
+                        <p class="mb-1"><strong>Level:</strong> {{ claim.level.name }}</p>
+                        <p class="mb-1"><strong>Difficulty:</strong>
+                            {% if claim.level.difficulty %}
+                                <span class="badge
+                                    {% if claim.level.difficulty == 'Easy' %}bg-success
+                                    {% elif claim.level.difficulty == 'Medium' %}bg-warning
+                                    {% elif claim.level.difficulty == 'Hard' %}bg-danger
+                                    {% endif %}">
+                                    {{ claim.level.difficulty }}
+                                </span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-1"><strong>Submitted:</strong> {{ claim.submitted_at.strftime('%b %d, %Y at %I:%M %p') }}</p>
+
+                        {% if claim.user_notes %}
+                            <div class="mt-3">
+                                <p class="mb-1"><strong>User Notes:</strong></p>
+                                <p class="text-muted"><em>{{ claim.user_notes }}</em></p>
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-3">
+                            <p class="mb-1"><strong>YouTube Link:</strong></p>
+                            <a href="{{ claim.youtube_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                Open in YouTube
+                            </a>
+                        </div>
+
+                        <div class="mt-3">
+                            <a href="{{ url_for('admin.review_claim', claim_id=claim.id) }}" class="btn btn-primary">
+                                Review This Claim
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        {% set video_id = claim.youtube_link | youtube_id %}
+                        {% if video_id %}
+                            <div class="ratio ratio-16x9">
+                                <iframe
+                                    src="https://www.youtube.com/embed/{{ video_id }}"
+                                    title="Claim #{{ claim.id }}"
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                Video preview unavailable
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-success">
+        <h4 class="alert-heading">All Caught Up!</h4>
+        <p>There are no pending claims to review at this time.</p>
+    </div>
+{% endif %}
+{% endblock %}

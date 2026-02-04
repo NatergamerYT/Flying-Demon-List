@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Game Leaderboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">Admin Dashboard</h1>
+        <p class="lead text-muted">Manage claims, users, and levels</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-warning">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-warning">{{ stats.pending_count }}</h3>
+                <p class="card-text">Pending Claims</p>
+                <a href="{{ url_for('admin.pending_claims') }}" class="btn btn-warning btn-sm">Review</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-success">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-success">{{ stats.approved_count }}</h3>
+                <p class="card-text">Approved Claims</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-primary">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-primary">{{ stats.total_users }}</h3>
+                <p class="card-text">Total Users</p>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-primary btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-info">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-info">{{ stats.total_levels }}</h3>
+                <p class="card-text">Total Levels</p>
+                <a href="{{ url_for('admin.levels') }}" class="btn btn-info btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-3">Recent Claims</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in recent_claims %}
+                        <tr>
+                            <td>{{ claim.id }}</td>
+                            <td>
+                                <a href="{{ url_for('users.profile', username=claim.user.username) }}">
+                                    {% if claim.user.profile_picture %}
+                                        <img src="{{ url_for('static', filename='uploads/' + claim.user.profile_picture) }}" alt="Profile" class="rounded-circle me-2" style="width: 20px; height: 20px; object-fit: cover;">
+                                    {% endif %}
+                                    {{ claim.user.username }}
+                                </a>
+                            </td>
+                            <td>{{ claim.level.name }}</td>
+                            <td>
+                                <span class="badge
+                                    {% if claim.status == 'approved' %}bg-success
+                                    {% elif claim.status == 'rejected' %}bg-danger
+                                    {% else %}bg-warning text-dark
+                                    {% endif %}">
+                                    {{ claim.status.upper() }}
+                                </span>
+                            </td>
+                            <td>{{ claim.submitted_at.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                {% if claim.status == 'pending' %}
+                                    <a href="{{ url_for('admin.review_claim', claim_id=claim.id) }}" class="btn btn-sm btn-primary">
+                                        Review
+                                    </a>
+                                {% else %}
+                                    <a href="{{ claim.youtube_link }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        View Video
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

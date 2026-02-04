@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Claim - Game Leaderboard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Submit Level Completion Claim</h2>
+                <p class="text-muted mb-4">
+                    Submit proof of your level completion with a YouTube video link. Your claim will be reviewed by an admin before appearing on the leaderboard.
+                </p>
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.level_name.label(class="form-label") }}
+                        {{ form.level_name(class="form-control", list="level-suggestions", placeholder="Type or select a level name...", autocomplete="off") }}
+                        <datalist id="level-suggestions">
+                            {% for level in existing_levels %}
+                                <option value="{{ level.name }}">
+                            {% endfor %}
+                        </datalist>
+                        {% if form.level_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.level_name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Type a level name or select from existing levels</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.youtube_link.label(class="form-label") }}
+                        {{ form.youtube_link(class="form-control", placeholder="https://youtube.com/watch?v=...") }}
+                        {% if form.youtube_link.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.youtube_link.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Provide a YouTube link showing your completion
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.user_notes.label(class="form-label") }}
+                        {{ form.user_notes(class="form-control", rows="3", placeholder="Add any notes about your run (optional)") }}
+                        {% if form.user_notes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.user_notes.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Max 500 characters</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h5>Submission Guidelines</h5>
+            <ul class="text-muted">
+                <li>Video must clearly show the level completion</li>
+                <li>Use YouTube links only (youtube.com or youtu.be)</li>
+                <li>Claims are reviewed by admins before approval</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

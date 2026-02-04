@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Review Claim #{{ claim.id }} - Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">Review Claim #{{ claim.id }}</h1>
+        <a href="{{ url_for('admin.pending_claims') }}" class="btn btn-secondary">Back to Pending Claims</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Claim Details</h4>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>User:</strong>
+                            <a href="{{ url_for('users.profile', username=claim.user.username) }}">
+                                {% if claim.user.profile_picture %}
+                                    <img src="{{ url_for('static', filename='uploads/' + claim.user.profile_picture) }}" alt="Profile" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                                {% endif %}
+                                {{ claim.user.username }}
+                            </a>
+                        </p>
+                        <p class="mb-1"><strong>Level:</strong> {{ claim.level.name }}</p>
+                        <p class="mb-1"><strong>Difficulty:</strong>
+                            {% if claim.level.difficulty %}
+                                <span class="badge
+                                    {% if claim.level.difficulty == 'Easy' %}bg-success
+                                    {% elif claim.level.difficulty == 'Medium' %}bg-warning
+                                    {% elif claim.level.difficulty == 'Hard' %}bg-danger
+                                    {% endif %}">
+                                    {{ claim.level.difficulty }}
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Submitted:</strong> {{ claim.submitted_at.strftime('%b %d, %Y at %I:%M %p') }}</p>
+                        <p class="mb-1"><strong>Status:</strong>
+                            <span class="badge bg-warning text-dark">{{ claim.status.upper() }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                {% if claim.user_notes %}
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>User Notes:</strong></p>
+                        <div class="alert alert-light">
+                            {{ claim.user_notes }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <p class="mb-2"><strong>YouTube Video:</strong></p>
+                    {% set video_id = claim.youtube_link | youtube_id %}
+                    {% if video_id %}
+                        <div class="ratio ratio-16x9">
+                            <iframe
+                                src="https://www.youtube.com/embed/{{ video_id }}"
+                                title="Claim #{{ claim.id }}"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            Video preview unavailable.
+                            <a href="{{ claim.youtube_link }}" target="_blank">Open in YouTube</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Review Action</h4>
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.action.label(class="form-label") }}
+                        {{ form.action(class="form-select") }}
+                    </div>
+
+                    <div class="mb-3" id="rank-assignment-section">
+                        {{ form.assigned_rank.label(class="form-label") }}
+                        {{ form.assigned_rank(class="form-control", placeholder="Leave blank for unranked") }}
+                        <small class="form-text text-muted">
+                            Assign rank 1-50 within {{ claim.level.name }}.
+                            {% if rank_info %}
+                                <br>Currently {{ rank_info.ranked_count }}/50 ranked.
+                                {% if rank_info.next_available_rank %}
+                                    Next available: #{{ rank_info.next_available_rank }}
+                                {% else %}
+                                    Level is full (50/50).
+                                {% endif %}
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <div class="mb-3" id="first-victor-section">
+                        <div class="form-check">
+                            {{ form.is_first_victor(class="form-check-input") }}
+                            {{ form.is_first_victor.label(class="form-check-label") }}
+                        </div>
+                        <small class="form-text text-muted">First person to complete this level. Only one allowed per level.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.admin_notes.label(class="form-label") }}
+                        {{ form.admin_notes(class="form-control", rows="4", placeholder="Add notes about your decision (optional)") }}
+                        <small class="form-text text-muted">Max 500 characters</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('admin.pending_claims') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Review Guidelines</h5>
+                <ul class="small text-muted mb-0">
+                    <li>Verify the video shows legitimate level completion</li>
+                    <li>Check that the video link works correctly</li>
+                    <li>Approve if the claim appears valid</li>
+                    <li>Reject if fraudulent or invalid</li>
+                    <li>Provide notes explaining rejection reasons</li>
+                    <li>Assign ranks 1-50 to approved claims for leaderboard placement</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Hide rank and first victor fields when rejecting
+document.addEventListener('DOMContentLoaded', function() {
+    const actionSelect = document.querySelector('select[name="action"]');
+    const rankSection = document.getElementById('rank-assignment-section');
+    const firstVictorSection = document.getElementById('first-victor-section');
+
+    function updateVisibility() {
+        if (actionSelect.value === 'reject') {
+            rankSection.style.display = 'none';
+            firstVictorSection.style.display = 'none';
+        } else {
+            rankSection.style.display = 'block';
+            firstVictorSection.style.display = 'block';
+        }
+    }
+
+    // Set initial visibility
+    updateVisibility();
+
+    // Update on change
+    actionSelect.addEventListener('change', updateVisibility);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Game Leaderboard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1 class="display-1 fw-bold">500</h1>
+        <h2 class="mb-4">Internal Server Error</h2>
+        <p class="lead text-muted mb-4">
+            Something went wrong on our end. We're working to fix it!
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-lg">Go Home</a>
+            <a href="javascript:window.location.reload();" class="btn btn-outline-secondary btn-lg">Try Again</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

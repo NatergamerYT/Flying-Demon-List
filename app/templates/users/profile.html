@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile - Game Leaderboard{% endblock %}
+
+{% block content %}
+<style>
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.first-victor-badge {
+    background: linear-gradient(45deg, #ff0000, #ff7700, #ffdd00, #00ff00, #0088ff, #0000ff, #8800ff);
+    background-size: 400% 400%;
+    animation: gradient 3s ease infinite;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    padding: 0.5em 1em;
+    border-radius: 0.25rem;
+    display: inline-block;
+}
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">
+            {% if user.profile_picture %}
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" alt="Profile Picture" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+            {% endif %}
+            {{ user.username }}
+            {% if user.is_admin %}
+                <span class="badge bg-warning">Admin</span>
+            {% endif %}
+        </h1>
+        <p class="lead text-muted">Member since {{ user.created_at.strftime('%B %Y') }}</p>
+        {% if user == current_user %}
+            <a href="{{ url_for('users.edit_profile') }}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-primary">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-primary">{{ stats.total_points }}</h3>
+                <p class="card-text">Total Points</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-success">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-success">{{ stats.completed_levels }}</h3>
+                <p class="card-text">Levels Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-warning">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-warning">{{ stats.pending_count }}</h3>
+                <p class="card-text">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100" style="border: 2px solid #ffd700;">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold" style="color: #ffd700;">{{ stats.first_victor_count }}</h3>
+                <p class="card-text">First Victor 👑</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-3">Claims by Level</h3>
+        {% if claims_by_level %}
+            <div class="accordion" id="claimsAccordion">
+                {% for level_name, claims in claims_by_level %}
+                    <div class="accordion-item mb-2">
+                        <h2 class="accordion-header" id="heading-{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
+                                <strong>{{ level_name }}</strong>
+                                <span class="ms-2 badge bg-secondary">{{ claims|length }} claim{{ 's' if claims|length != 1 else '' }}</span>
+                                {% set approved_claims = claims | selectattr('status', 'equalto', 'approved') | list %}
+                                {% if approved_claims %}
+                                    <span class="ms-2 badge bg-success">✓ Completed</span>
+                                    {% set first_victors = approved_claims | selectattr('is_first_victor', 'equalto', True) | list %}
+                                    {% if first_victors %}
+                                        <span class="ms-2 badge first-victor-badge">👑 FIRST VICTOR</span>
+                                    {% endif %}
+                                {% endif %}
+                            </button>
+                        </h2>
+                        <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ loop.index }}" data-bs-parent="#claimsAccordion">
+                            <div class="accordion-body">
+                                {% for claim in claims %}
+                                    <div class="card mb-3 {% if claim.is_first_victor %}border-warning{% endif %}" {% if claim.is_first_victor %}style="border-width: 2px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);"{% endif %}>
+                                        <div class="card-body">
+                                            {% if claim.is_first_victor %}
+                                                <div class="mb-3">
+                                                    <span class="first-victor-badge">👑 FIRST VICTOR</span>
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="mb-2">
+                                                        <span class="badge
+                                                            {% if claim.status == 'approved' %}bg-success
+                                                            {% elif claim.status == 'rejected' %}bg-danger
+                                                            {% else %}bg-warning text-dark
+                                                            {% endif %}">
+                                                            {{ claim.status.upper() }}
+                                                        </span>
+                                                        {% if claim.level.difficulty %}
+                                                            <span class="badge
+                                                                {% if claim.level.difficulty == 'Easy' %}bg-success
+                                                                {% elif claim.level.difficulty == 'Medium' %}bg-warning
+                                                                {% elif claim.level.difficulty == 'Hard' %}bg-danger
+                                                                {% endif %}">
+                                                                {{ claim.level.difficulty }}
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <p class="mb-1">
+                                                        <strong>Submitted:</strong> {{ claim.submitted_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                                    </p>
+
+                                                    {% if claim.status == 'approved' %}
+                                                        <p class="mb-1"><strong>Points Earned:</strong> <span class="badge bg-primary">{{ claim.points }} pts</span></p>
+                                                        {% if claim.rank %}
+                                                            <p class="mb-1">
+                                                                <strong>Rank:</strong> #{{ claim.rank }}
+                                                                {% if claim.rank <= 3 %}
+                                                                    {% if claim.rank == 1 %}🥇
+                                                                    {% elif claim.rank == 2 %}🥈
+                                                                    {% elif claim.rank == 3 %}🥉
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            </p>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    {% if claim.user_notes %}
+                                                        <p class="mb-1 mt-2"><strong>Notes:</strong></p>
+                                                        <p class="text-muted"><em>{{ claim.user_notes }}</em></p>
+                                                    {% endif %}
+
+                                                    {% if claim.status == 'rejected' and claim.admin_notes %}
+                                                        <div class="alert alert-danger mt-2 mb-2">
+                                                            <strong>Rejection Reason:</strong> {{ claim.admin_notes }}
+                                                        </div>
+                                                    {% endif %}
+
+                                                    <p class="mb-0 mt-2">
+                                                        <a href="{{ claim.youtube_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            Watch on YouTube
+                                                        </a>
+                                                    </p>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    {% set video_id = claim.youtube_link | youtube_id %}
+                                                    {% if video_id %}
+                                                        <div class="ratio ratio-16x9">
+                                                            <iframe
+                                                                src="https://www.youtube.com/embed/{{ video_id }}"
+                                                                title="{{ claim.level.name }}"
+                                                                allowfullscreen>
+                                                            </iframe>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p class="mb-0">This user hasn't submitted any claims yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
