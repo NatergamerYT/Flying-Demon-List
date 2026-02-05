@@ -6,6 +6,9 @@ from flask_wtf.csrf import CSRFProtect
 from config import config
 from .utils import extract_youtube_id
 from sqlalchemy import inspect
+from flask_migrate import upgrade
+from app.models import User
+import os
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -62,16 +65,32 @@ def create_app(config_name='development'):
         db.session.rollback()
         return render_template('errors/500.html'), 500
 
-    # Ensure tables exist (helps deployments that don't run migrations automatically)
+    # Ensure tables and migrations are applied on startup. This helps fresh
+    # deployments (e.g., Render) that don't run `flask db upgrade` automatically.
     try:
         with app.app_context():
             inspector = inspect(db.engine)
             tables = inspector.get_table_names()
-            # If our core table 'levels' is missing, create all tables.
             if 'levels' not in tables:
-                db.create_all()
+                # Try running migrations first; fall back to create_all().
+                try:
+                    upgrade()
+                except Exception:
+                    db.create_all()
+
+            # Optionally create a default admin user when requested via env var.
+            if os.environ.get('AUTO_CREATE_ADMIN', '0') == '1':
+                admin_exists = User.query.filter_by(is_admin=True).first()
+                if not admin_exists:
+                    username = os.environ.get('ADMIN_USERNAME', 'NaterGamer')
+                    email = os.environ.get('ADMIN_EMAIL', 'natergamer@example.com')
+                    password = os.environ.get('ADMIN_PASSWORD', 'Nc522774')
+                    user = User(username=username, email=email, is_admin=True)
+                    user.set_password(password)
+                    db.session.add(user)
+                    db.session.commit()
     except Exception:
-        # If creation fails, let the app continue and surface errors normally.
+        # If creation/migration fails, allow the app to start and surface errors.
         pass
 
     return app
