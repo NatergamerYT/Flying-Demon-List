@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from config import config
 from .utils import extract_youtube_id
+from sqlalchemy import inspect
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -61,4 +62,17 @@ def create_app(config_name='development'):
         db.session.rollback()
         return render_template('errors/500.html'), 500
 
+    # Ensure tables exist (helps deployments that don't run migrations automatically)
+    try:
+        with app.app_context():
+            inspector = inspect(db.engine)
+            tables = inspector.get_table_names()
+            # If our core table 'levels' is missing, create all tables.
+            if 'levels' not in tables:
+                db.create_all()
+    except Exception:
+        # If creation fails, let the app continue and surface errors normally.
+        pass
+
     return app
+
