@@ -90,6 +90,23 @@ def create_app(config_name='development'):
                     user.set_password(password)
                     db.session.add(user)
                     db.session.commit()
+
+            # Seed initial levels if none exist
+            from app.models import Level
+            if Level.query.count() == 0:
+                initial_levels = [
+                    {'name': 'Level 1 - Tutorial', 'description': 'Learn the basics', 'difficulty': 'Easy'},
+                    {'name': 'Level 2 - Getting Started', 'description': 'Apply your skills', 'difficulty': 'Easy'},
+                    {'name': 'Level 3 - Intermediate Challenge', 'description': 'Test your abilities', 'difficulty': 'Medium'},
+                    {'name': 'Level 4 - Advanced Tactics', 'description': 'Master complex mechanics', 'difficulty': 'Medium'},
+                    {'name': 'Level 5 - Expert Trial', 'description': 'Push your limits', 'difficulty': 'Hard'},
+                    {'name': 'Level 6 - Nightmare Mode', 'description': 'Only for the best', 'difficulty': 'Hard'},
+                ]
+                for level_data in initial_levels:
+                    level = Level(**level_data)
+                    level.update_points()
+                    db.session.add(level)
+                db.session.commit()
     except Exception:
         # If creation/migration fails, allow the app to start and surface errors.
         pass
