@@ -3,6 +3,7 @@ from app.main import main_bp
 from app.models import Claim, Level, User
 from app import db
 from sqlalchemy.exc import OperationalError
+from flask import jsonify
 import re
 
 def get_youtube_video_id(url):
@@ -84,3 +85,14 @@ def leaderboard():
     user_rankings.sort(key=lambda x: x['total_points'], reverse=True)
 
     return render_template('leaderboard/index.html', user_rankings=user_rankings)
+
+
+@main_bp.route('/health')
+def health():
+    """Simple health check endpoint verifying DB connectivity."""
+    try:
+        # perform a lightweight query
+        db.session.execute('SELECT 1')
+        return jsonify(status='ok'), 200
+    except Exception:
+        return jsonify(status='error'), 500
