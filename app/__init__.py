@@ -7,7 +7,6 @@ from config import config
 from .utils import extract_youtube_id
 from sqlalchemy import inspect
 from flask_migrate import upgrade
-from app.models import User
 import os
 
 db = SQLAlchemy()
@@ -80,6 +79,8 @@ def create_app(config_name='development'):
 
             # Optionally create a default admin user when requested via env var.
             if os.environ.get('AUTO_CREATE_ADMIN', '0') == '1':
+                # Import here to avoid circular import during module load
+                from app.models import User
                 admin_exists = User.query.filter_by(is_admin=True).first()
                 if not admin_exists:
                     username = os.environ.get('ADMIN_USERNAME', 'NaterGamer')
