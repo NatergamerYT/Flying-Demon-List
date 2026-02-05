@@ -2,6 +2,7 @@ from flask import render_template, request
 from app.main import main_bp
 from app.models import Claim, Level, User
 from app import db
+from sqlalchemy.exc import OperationalError
 import re
 
 def get_youtube_video_id(url):
@@ -15,10 +16,15 @@ def get_youtube_video_id(url):
 def index():
     """Homepage with hardest levels."""
     # Get levels ordered by rank (1 at top, 50 at bottom, unranked at bottom)
-    hardest_levels = Level.query.order_by(
-        Level.rank.asc().nullslast(),
-        Level.name
-    ).all()
+    try:
+        hardest_levels = Level.query.order_by(
+            Level.rank.asc().nullslast(),
+            Level.name
+        ).all()
+    except OperationalError:
+        # If the `levels` table doesn't exist (e.g. migrations not applied),
+        # return an empty homepage without raising a 500.
+        hardest_levels = []
 
     # Add video ID and victors for each level
     for level in hardest_levels:
@@ -27,9 +33,14 @@ def index():
         level.first_victor = approved_claims[0].user if approved_claims else None
         level.other_victors = [claim.user for claim in approved_claims[1:]]
 
-    total_claims = Claim.query.filter_by(status='approved').count()
-    total_users = User.query.count()
-    total_levels = Level.query.count()
+    try:
+        total_claims = Claim.query.filter_by(status='approved').count()
+        total_users = User.query.count()
+        total_levels = Level.query.count()
+    except OperationalError:
+        total_claims = 0
+        total_users = 0
+        total_levels = 0
 
     stats = {
         'total_claims': total_claims,
