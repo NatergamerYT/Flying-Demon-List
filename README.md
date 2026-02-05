@@ -78,6 +78,27 @@ flask run
 
 Visit http://localhost:5000
 
+## Deployment notes
+
+- Recommended start command (Render / production):
+
+```
+flask db upgrade && gunicorn run:app
+```
+
+- You can also use the included `bin/start.sh` which runs migrations then starts Gunicorn.
+
+- To auto-create an admin on first startup, set the following environment variables in your host:
+
+```
+AUTO_CREATE_ADMIN=1
+ADMIN_USERNAME=NaterGamer
+ADMIN_EMAIL=natergamer@example.com
+ADMIN_PASSWORD=Nc522774
+```
+
+This will create the admin only if no admin user exists.
+
 ## Project Structure
 
 ```
